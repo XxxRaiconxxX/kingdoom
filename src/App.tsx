@@ -533,16 +533,6 @@ function MarketSection() {
         </p>
       </header>
 
-      <div className="rounded-[2rem] border border-amber-500/15 bg-amber-500/6 p-4 text-sm leading-6 text-stone-400">
-        <p className="font-semibold text-amber-300">Nota sobre imagenes externas</p>
-        <p className="mt-2">
-          Puedes usar URLs directas de imagen en cada producto. Si quieres usar
-          Pinterest, la URL debe apuntar al archivo de imagen, por ejemplo
-          `https://i.pinimg.com/...jpg`, no a una pagina `pinterest.com/pin/...`.
-          Si Pinterest bloquea el hotlink, la tarjeta mostrara un fallback visual.
-        </p>
-      </div>
-
       <div className="space-y-4">
         {MARKET_CATEGORIES.map((category) => {
           const Icon = category.icon;
@@ -827,7 +817,7 @@ function PurchaseModal({
       if (response.ok) {
         setSubmitState("success");
         setFeedbackMessage(
-          "Pedido enviado con exito. Revisa tu correo objetivo en Formspree para ver la solicitud."
+          "Pedido enviado con exito. El Owner se comunicara contigo para confirmar el pedido."
         );
         return;
       }
