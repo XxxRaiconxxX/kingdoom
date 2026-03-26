@@ -1,53 +1,338 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
 import {
   Castle,
   ChevronDown,
+  Coins,
+  Crown,
+  Dice5,
+  Flame,
+  Gem,
   Home,
+  Map,
   ScrollText,
+  Shield,
+  Skull,
   Store,
+  Sword,
   Trophy,
+  Users,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { EventCard } from "./components/EventCard";
-import { FilterPill } from "./components/FilterPill";
-import { MarketItemCard } from "./components/MarketItemCard";
-import { PurchaseModal } from "./components/PurchaseModal";
-import { RankingCard } from "./components/RankingCard";
-import { SectionHeader } from "./components/SectionHeader";
-import { StatCard } from "./components/StatCard";
-import { ACTIVE_EVENTS } from "./data/events";
-import {
-  HOME_STATS,
-  JOIN_STEPS,
-  KINGDOM_ANNOUNCEMENTS,
-  KINGDOM_STATUS,
-  WHATSAPP_JOIN_URL,
-} from "./data/home";
-import { LORE_CHAPTERS, LORE_RULES, REALM_FACTIONS } from "./data/lore";
-import { MARKET_CATEGORIES, MARKET_ITEMS } from "./data/market";
-import { RANKING_PLAYERS } from "./data/ranking";
-import {
-  COMMON_THREATS,
-  DEMOGRAPHIC_BLOCS,
-  DIPLOMATIC_TENSIONS,
-  WORLD_STATUS,
-} from "./data/world";
-import type {
-  MarketCategoryId,
-  MarketItem,
-  NavItem,
-  PlayerStatus,
-  Rarity,
-  StockStatus,
-  TabId,
-} from "./types";
+
+type TabId = "home" | "lore" | "world" | "market" | "ranking";
+type Rarity = "legendary" | "epic" | "rare" | "common";
+type PlayerStatus = "alive" | "dead";
+
+type NavItem = {
+  id: TabId;
+  label: string;
+  icon: LucideIcon;
+};
+
+type MarketItem = {
+  name: string;
+  description: string;
+  price: number;
+  rarity: Rarity;
+  icon: LucideIcon;
+};
+
+type RankingPlayer = {
+  name: string;
+  faction: string;
+  level: number;
+  gold: number;
+  status: PlayerStatus;
+};
+
+type DemographicBloc = {
+  realm: string;
+  epithet: string;
+  summary: string;
+  groups: {
+    title: string;
+    races: string[];
+  }[];
+};
+
+type WorldNote = {
+  title: string;
+  summary: string;
+  details: string;
+};
+
+type FactionNote = {
+  name: string;
+  summary: string;
+  details: string;
+};
+
+const WHATSAPP_JOIN_URL = "https://chat.whatsapp.com/TU-ENLACE-DE-INVITACION";
 
 const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Inicio", icon: Home },
   { id: "lore", label: "Lore", icon: ScrollText },
+  { id: "world", label: "Mundo", icon: Map },
   { id: "market", label: "Mercado", icon: Store },
   { id: "ranking", label: "Ranking", icon: Trophy },
 ];
+
+const MARKET_ITEMS: MarketItem[] = [
+  {
+    name: "Espada del Eclipse",
+    description: "Hoja maldita capaz de ignorar armaduras comunes y sembrar miedo.",
+    price: 1250,
+    rarity: "legendary",
+    icon: Sword,
+  },
+  {
+    name: "Sello de Obsidiana",
+    description: "Amuleto de linaje oscuro que protege de maldiciones durante una escena.",
+    price: 780,
+    rarity: "epic",
+    icon: Shield,
+  },
+  {
+    name: "Gema de Vigilia",
+    description: "Cristal encantado que revela trampas y emboscadas al lanzar dados.",
+    price: 410,
+    rarity: "rare",
+    icon: Gem,
+  },
+  {
+    name: "Raciones del Camino Gris",
+    description: "Suministros basicos para viajes largos, asedios y expediciones nocturnas.",
+    price: 95,
+    rarity: "common",
+    icon: Coins,
+  },
+];
+
+const RANKING_PLAYERS: RankingPlayer[] = [
+  { name: "Aldric Noctis", faction: "Cuervos del Norte", level: 28, gold: 3420, status: "alive" },
+  { name: "Seraphina Voss", faction: "Orden del Sol Marchito", level: 24, gold: 2890, status: "alive" },
+  { name: "Thorne Blackwall", faction: "Guardianes del Umbral", level: 21, gold: 2015, status: "dead" },
+  { name: "Lyra Duskbane", faction: "Cuervos del Norte", level: 19, gold: 1785, status: "alive" },
+  { name: "Marek Hollow", faction: "Mercenarios del Hierro", level: 17, gold: 1490, status: "alive" },
+];
+
+const LORE_CHAPTERS = [
+  {
+    title: "El eclipse eterno",
+    summary: "El Sol de Ceniza desaparecio y dejo al reino atrapado en una penumbra constante.",
+    content:
+      "Hace veinte inviernos, la luz del reino se apago tras un eclipse imposible. Desde entonces, las ciudades nobles se pudren, los juramentos sagrados se quiebran y cada frontera vive pendiente de la siguiente traicion.",
+  },
+  {
+    title: "La Corona de Carbon",
+    summary: "Una reliquia antigua ha vuelto a latir bajo las ruinas de Valdren.",
+    content:
+      "La Corona de Carbon, simbolo del antiguo monarca, ha vuelto a emitir un fulgor oscuro bajo las ruinas de Valdren. Quien la reclame podria reunir las facciones bajo una sola bandera o arrastrarlas a una guerra total entre vivos, traidores y fantasmas.",
+  },
+];
+
+const STORY_FACTIONS: FactionNote[] = [
+  {
+    name: "Cuervos del Norte",
+    summary: "Exploradores, saqueadores y vigias de las rutas heladas.",
+    details:
+      "Los Cuervos del Norte dominan la informacion y el movimiento. Sus capitanes comercian secretos, escoltan caravanas y aparecen justo donde el reino se rompe.",
+  },
+  {
+    name: "Orden del Sol Marchito",
+    summary: "Caballeros de una fe desgastada que aun intenta sostener el orden.",
+    details:
+      "Aunque su brillo ya no inspira como antes, la Orden mantiene monasterios, reliquias y juramentos que todavia pesan en la politica del reino.",
+  },
+  {
+    name: "Guardianes del Umbral",
+    summary: "Custodios de ruinas, sellos y reliquias que nadie deberia tocar.",
+    details:
+      "Conocen pasadizos, criptas y viejos pactos. Su influencia es silenciosa, pero cada expedicion relevante termina dependiendo de ellos.",
+  },
+  {
+    name: "Mercenarios del Hierro",
+    summary: "Comerciantes de acero, escoltas y soldados a sueldo.",
+    details:
+      "No sirven a una corona; sirven al contrato. Cuando una guerra no puede declararse en publico, casi siempre se pelea con sus armas.",
+  },
+];
+
+const WORLD_STATUS = {
+  title: "Paz tensa",
+  description:
+    "Los grandes poderes de Aethelgardia dependen unos de otros para sobrevivir, pero la desconfianza es absoluta y cada alianza es provisional.",
+};
+
+const DEMOGRAPHIC_BLOCS: DemographicBloc[] = [
+  {
+    realm: "El Imperio de Kaelum-Gard",
+    epithet: "El Puno del Orden",
+    summary: "Un poder militarista que mezcla disciplina imperial, nobleza estratega y fuerza industrial.",
+    groups: [
+      {
+        title: "Casta de mando",
+        races: ["Humanos", "Angeles de las Virtudes", "Serafines"],
+      },
+      {
+        title: "Aristocracia y estrategia",
+        races: ["Vampiros Sangre Pura", "Altos Elfos", "Elfos de Sangre"],
+      },
+      {
+        title: "Fuerza bruta",
+        races: ["Orcos de Hierro", "Minotauros", "Ciclopes", "Gigantes de Fuego"],
+      },
+      {
+        title: "Infraestructura",
+        races: ["Golems de Piedra", "Automatas de Vapor", "Enanos de las Montanas"],
+      },
+    ],
+  },
+  {
+    realm: "El Protectorado de Oakhaven",
+    epithet: "El Latido Alquimico",
+    summary: "Bosques rituales, bestias guardianas y alquimia viva al servicio del equilibrio natural.",
+    groups: [
+      {
+        title: "Guardianes ancestrales",
+        races: ["Elfos Silvanos", "Elfos de la Noche", "Driadas", "Ents", "Kodamas"],
+      },
+      {
+        title: "Cazadores y protectores",
+        races: ["Lycans", "Hombres Tigre", "Hombres Leon", "Ursine"],
+      },
+      {
+        title: "Alquimia viviente",
+        races: ["Hombres Planta", "Myconids", "Mandragoras", "Ninfas"],
+      },
+      {
+        title: "Mensajeros del viento",
+        races: ["Silfos", "Hadas", "Pixies", "Tengus"],
+      },
+    ],
+  },
+  {
+    realm: "El Nexo de Arcania",
+    epithet: "El Prisma del Saber",
+    summary: "Un centro de refinamiento, cristal y conocimiento que todos necesitan y nadie controla del todo.",
+    groups: [
+      {
+        title: "Entidades de energia",
+        races: ["Ethereals", "Cuerpos de Eter", "Sombras Vivientes"],
+      },
+      {
+        title: "Maestros del cristal",
+        races: ["Golems de Cristal", "Enanos Oscuros", "Svirfneblin"],
+      },
+      {
+        title: "Inmortales y hibridos",
+        races: ["Liches", "Aasimar", "Tieflings", "Nephilim", "Sucubos e Incubos"],
+      },
+    ],
+  },
+  {
+    realm: "La Union de los Paramos",
+    epithet: "La Senda del Pragmatismo",
+    summary: "Rutas, peajes, ingenieria de supervivencia y comercio para un continente que nunca deja de moverse.",
+    groups: [
+      {
+        title: "Ingenieria y comercio",
+        races: ["Goblins Ingenieros", "Hobgoblins", "Tanukis", "Kitsunes", "Skaven"],
+      },
+      {
+        title: "Logistica de ruta",
+        races: ["Centauros", "Sleipnir Humanoides", "Hombres Jabali", "Hombres Topo"],
+      },
+      {
+        title: "Supervivencia extrema",
+        races: ["Trolls", "Gigantes de Escarcha", "Gnolls", "Kobolds"],
+      },
+    ],
+  },
+  {
+    realm: "Naciones del Agua y Exiliados",
+    epithet: "Los reinos sin una sola bandera",
+    summary: "Pueblos acuaticos, linajes errantes y razas ominosas que sobreviven en los margenes del continente.",
+    groups: [
+      {
+        title: "Reinos acuaticos",
+        races: ["Sirenas", "Tritones", "Nagas", "Cecaelias", "Hombres Tiburon", "Hombres Pulpo"],
+      },
+      {
+        title: "Los ominosos",
+        races: ["Dullahan", "Ghouls", "Gorgonas", "Banshees"],
+      },
+    ],
+  },
+];
+
+const DIPLOMATIC_TENSIONS: WorldNote[] = [
+  {
+    title: "Kaelum-Gard vs Oakhaven",
+    summary: "El Imperio codicia los bosques y Oakhaven amenaza con arrasarlo todo antes de ceder.",
+    details:
+      "Kaelum-Gard necesita anexar los bosques para asegurar la resina y consolidar sus lineas de produccion. Oakhaven ha dejado claro que, si es invadido, sacrificara su propio ecosistema antes de permitir una ocupacion imperial.",
+  },
+  {
+    title: "El monopolio de Arcania",
+    summary: "Todos detestan depender de Arcania, pero nadie puede reemplazar su refinamiento.",
+    details:
+      "Los cuatro reinos necesitan el refinamiento arcano de Arcania para sostener su maquinaria, alquimia y armamento. Replicar el proceso sin sus formulas podria terminar en una catastrofe magica comparable a una detonacion nuclear.",
+  },
+  {
+    title: "El peaje de los Paramos",
+    summary: "La Union cobra por cada ruta segura y convierte la logistica en poder politico.",
+    details:
+      "Kaelum-Gard considera los impuestos de la Union una extorsion abierta, pero carece del alcance necesario para patrullar todo el continente. Mientras tanto, la Union se enriquece controlando el movimiento de personas, minerales y suministros.",
+  },
+];
+
+const COMMON_THREATS: WorldNote[] = [
+  {
+    title: "La fauna cristalizada",
+    summary: "Bestias mutadas por la Fractura atacan rutas, caravanas y lineas de suministro.",
+    details:
+      "Las mutaciones cristalinas deforman depredadores, corrompen territorios y vuelven impredecible cualquier expedicion. Incluso los grandes reinos deben redirigir recursos para contenerlas.",
+  },
+  {
+    title: "Espionaje industrial",
+    summary: "Todas las potencias infiltran agentes en Arcania para robar formulas de refinamiento.",
+    details:
+      "Nadie soporta la dependencia tecnologica de Arcania. Por eso, espias, saboteadores y facciones clandestinas pelean en la sombra por formulas, prototipos y secretos de laboratorio.",
+  },
+];
+
+const rarityStyles: Record<
+  Rarity,
+  { label: string; card: string; badge: string; iconWrap: string }
+> = {
+  legendary: {
+    label: "Legendario",
+    card: "border-amber-400/70 bg-amber-500/10 shadow-[0_0_30px_rgba(245,158,11,0.12)]",
+    badge: "bg-amber-400/15 text-amber-300 ring-1 ring-amber-400/25",
+    iconWrap: "bg-amber-400/15 text-amber-300",
+  },
+  epic: {
+    label: "Epico",
+    card: "border-fuchsia-400/55 bg-fuchsia-500/10",
+    badge: "bg-fuchsia-400/15 text-fuchsia-200 ring-1 ring-fuchsia-400/25",
+    iconWrap: "bg-fuchsia-400/15 text-fuchsia-200",
+  },
+  rare: {
+    label: "Raro",
+    card: "border-sky-400/55 bg-sky-500/10",
+    badge: "bg-sky-400/15 text-sky-200 ring-1 ring-sky-400/25",
+    iconWrap: "bg-sky-400/15 text-sky-200",
+  },
+  common: {
+    label: "Comun",
+    card: "border-stone-700 bg-stone-900/80",
+    badge: "bg-stone-700/40 text-stone-300 ring-1 ring-stone-600/40",
+    iconWrap: "bg-stone-800 text-stone-300",
+  },
+};
 
 const pageTransition = {
   initial: { opacity: 0, y: 22 },
@@ -56,16 +341,12 @@ const pageTransition = {
   transition: { duration: 0.28, ease: "easeOut" as const },
 };
 
-type MarketRarityFilter = Rarity | "all";
-type MarketStockFilter = StockStatus | "all";
-type RankingStatusFilter = PlayerStatus | "all";
-
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("home");
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-300">
-      <main className="mx-auto min-h-screen w-full max-w-6xl px-4 pb-28 pt-5 md:px-6 md:pb-12 md:pt-28 xl:px-8">
+      <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-32 pt-5">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -74,16 +355,17 @@ export default function App() {
             exit={pageTransition.exit}
             transition={pageTransition.transition}
           >
-            {activeTab === "home" ? <HomeSection /> : null}
-            {activeTab === "lore" ? <LoreSection /> : null}
-            {activeTab === "market" ? <MarketSection /> : null}
-            {activeTab === "ranking" ? <RankingSection /> : null}
+            {activeTab === "home" && <HomeSection />}
+            {activeTab === "lore" && <LoreSection />}
+            {activeTab === "world" && <WorldSection />}
+            {activeTab === "market" && <MarketSection />}
+            {activeTab === "ranking" && <RankingSection />}
           </motion.div>
         </AnimatePresence>
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-800/80 bg-stone-950/90 backdrop-blur-xl md:top-4 md:bottom-auto md:mx-auto md:w-fit md:max-w-4xl md:rounded-3xl md:border md:border-stone-800/80 md:bg-stone-950/85 md:px-2 md:py-2 md:shadow-2xl md:shadow-black/30">
-        <div className="mx-auto grid max-w-md grid-cols-4 gap-2 px-3 pt-3 pb-safe md:max-w-none md:gap-3 md:px-0 md:pt-0 md:pb-0">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-stone-800/80 bg-stone-950/90 backdrop-blur-xl">
+        <div className="mx-auto grid max-w-md grid-cols-5 gap-2 px-3 pt-3 pb-safe">
           {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const isActive = activeTab === id;
 
@@ -92,17 +374,13 @@ export default function App() {
                 key={id}
                 type="button"
                 onClick={() => setActiveTab(id)}
-                className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-[11px] font-semibold transition md:min-h-0 md:flex-row md:gap-2 md:px-4 md:py-3 md:text-sm ${
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-2 text-[10px] font-semibold transition ${
                   isActive
                     ? "border-amber-400/30 bg-amber-500/12 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.12)]"
                     : "border-transparent bg-stone-900/70 text-stone-400"
                 }`}
               >
-                <Icon
-                  className={`h-5 w-5 ${
-                    isActive ? "text-amber-400" : "text-stone-500"
-                  }`}
-                />
+                <Icon className={`h-5 w-5 ${isActive ? "text-amber-400" : "text-stone-500"}`} />
                 <span>{label}</span>
               </button>
             );
@@ -114,50 +392,39 @@ export default function App() {
 }
 
 function HomeSection() {
-  const featuredEvent =
-    ACTIVE_EVENTS.find((event) => event.status === "active") ?? ACTIVE_EVENTS[0];
-  const StatusIcon = KINGDOM_STATUS.icon;
-
   return (
-    <section className="space-y-6">
-      <div className="overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30 md:p-8">
+    <section className="space-y-5">
+      <div className="overflow-hidden rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6 shadow-2xl shadow-black/30">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">
           <Castle className="h-4 w-4" />
           Reino vivo por WhatsApp
         </div>
 
-        <h1 className="text-4xl font-black leading-none text-stone-100 md:max-w-3xl md:text-5xl">
-          Reino de las Sombras
-        </h1>
+        <h1 className="text-4xl font-black leading-none text-stone-100">Reino de las Sombras</h1>
 
-        <p className="mt-4 text-sm leading-6 text-stone-300/90 md:max-w-3xl md:text-base">
+        <p className="mt-4 text-sm leading-6 text-stone-300/90">
           Intrigas de corte, guerra entre facciones y reliquias prohibidas en un
           reino donde cada decision puede convertirte en leyenda o condenarte al
           olvido.
         </p>
 
-        <div className="mt-5 grid grid-cols-3 gap-3 md:max-w-2xl md:gap-4">
-          {HOME_STATS.map((stat) => (
-            <StatCard
-              key={stat.label}
-              icon={stat.icon}
-              value={stat.value}
-              label={stat.label}
-            />
-          ))}
+        <div className="mt-5 grid grid-cols-3 gap-3">
+          <StatCard icon={Users} value="120+" label="Personajes" />
+          <StatCard icon={Flame} value="4" label="Facciones" />
+          <StatCard icon={Dice5} value="24/7" label="Eventos" />
         </div>
 
         <a
           href={WHATSAPP_JOIN_URL}
           target="_blank"
           rel="noreferrer"
-          className="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400 md:max-w-sm"
+          className="mt-6 flex w-full items-center justify-center rounded-2xl bg-amber-500 px-4 py-4 text-sm font-extrabold text-stone-950 transition hover:bg-amber-400"
         >
           Unirse al Gremio (WhatsApp)
         </a>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4">
         <div className="rounded-3xl border border-stone-800 bg-stone-900/75 p-5">
           <h2 className="text-lg font-bold text-stone-100">La noche se mueve</h2>
           <p className="mt-2 text-sm leading-6 text-stone-400">
@@ -169,667 +436,407 @@ function HomeSection() {
         <div className="rounded-3xl border border-stone-800 bg-gradient-to-br from-stone-900 to-stone-950 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-amber-400/80">
-                {KINGDOM_STATUS.eyebrow}
-              </p>
-              <p className="mt-2 text-2xl font-black text-stone-100">
-                {KINGDOM_STATUS.title}
-              </p>
+              <p className="text-xs uppercase tracking-[0.2em] text-amber-400/80">Estado del reino</p>
+              <p className="mt-2 text-2xl font-black text-stone-100">Guerra fria</p>
             </div>
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3">
-              <StatusIcon className="h-6 w-6 text-amber-400" />
+              <Crown className="h-6 w-6 text-amber-400" />
             </div>
           </div>
           <p className="mt-3 text-sm leading-6 text-stone-400">
-            {KINGDOM_STATUS.description}
+            Las coronas vacilan, los gremios acumulan oro y el trono negro atrae
+            traiciones en cada frontera.
           </p>
         </div>
       </div>
-
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Agenda del reino"
-          title="Eventos activos"
-          description="El corazon narrativo del proyecto vive aqui. Cada evento tiene cronica, facciones y recompensas claras."
-          rightSlot={
-            <span className="rounded-full border border-stone-700 bg-stone-900/70 px-3 py-1 text-xs font-semibold text-stone-400">
-              {ACTIVE_EVENTS.length} eventos
-            </span>
-          }
-        />
-
-        {featuredEvent ? (
-          <div className="rounded-[1.75rem] border border-amber-500/15 bg-amber-500/6 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-              Evento destacado
-            </p>
-            <p className="mt-2 text-lg font-bold text-stone-100">
-              {featuredEvent.title}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-stone-400">
-              {featuredEvent.description}
-            </p>
-          </div>
-        ) : null}
-
-        <div className="grid gap-4 xl:grid-cols-2">
-          {ACTIVE_EVENTS.map((event) => (
-            <EventCard key={event.title} event={event} />
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Tablon"
-          title="Anuncios del reino"
-          description="Pequenos bloques para mantener la home con movimiento sin tocar la logica."
-        />
-        <div className="grid gap-4 md:grid-cols-2">
-          {KINGDOM_ANNOUNCEMENTS.map((announcement) => (
-            <div
-              key={announcement.title}
-              className="rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4"
-            >
-              <h3 className="text-lg font-bold text-stone-100">
-                {announcement.title}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-stone-400">
-                {announcement.content}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Primeros pasos"
-          title="Como unirse"
-          description="Una ruta corta para nuevos jugadores."
-        />
-        <div className="grid gap-4 md:grid-cols-3">
-          {JOIN_STEPS.map((step, index) => (
-            <div
-              key={step.title}
-              className="rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-sm font-black text-amber-300">
-                  {index + 1}
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-stone-100">
-                    {step.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-stone-400">
-                    {step.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
     </section>
   );
 }
 
 function LoreSection() {
-  const [openChapter, setOpenChapter] = useState<string | null>(
-    LORE_CHAPTERS[0]?.title ?? null
-  );
-
   return (
     <section className="space-y-5">
       <header className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
           Lore y reglas
         </p>
-        <h2 className="mt-3 text-3xl font-black text-stone-100">
-          Leyes de la penumbra
-        </h2>
+        <h2 className="mt-3 text-3xl font-black text-stone-100">Leyes de la penumbra</h2>
         <p className="mt-3 text-sm leading-6 text-stone-400">
-          El rol mezcla narrativa libre con decisiones tacticas. Ahora el lore
-          queda separado en reglas, capitulos y facciones para crecer mejor.
+          Esta pestana ahora se concentra en lo que mas importa al entrar al rol:
+          reglas, historia principal y las facciones narrativas que mueven la
+          temporada.
         </p>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {LORE_RULES.map((rule) => {
-          const Icon = rule.icon;
-
-          return (
-            <div
-              key={rule.title}
-              className="rounded-[1.75rem] border border-stone-800 bg-stone-900/75 p-5"
-            >
-              <div className="flex items-start gap-4">
-                <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-stone-100">
-                    {rule.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-stone-400">
-                    {rule.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      <div className="space-y-4">
+        <LoreCard
+          icon={Skull}
+          title="Permadeath"
+          description="Si un personaje muere de forma canonica, no regresa. Las decisiones arriesgadas importan y dejan huella real."
+        />
+        <LoreCard
+          icon={Dice5}
+          title="Uso de dados"
+          description="Las acciones clave, emboscadas y hechizos se resuelven con dados. La suerte influye, pero el contexto narrativo tambien pesa."
+        />
+        <LoreCard
+          icon={ScrollText}
+          title="Canon del reino"
+          description="Los eventos oficiales alteran alianzas, ciudades, recursos y reputaciones. Todo lo ocurrido puede repercutir en la temporada."
+        />
       </div>
 
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Cronica principal"
-          title="Capitulos del reino"
-          description="Cada bloque se puede ampliar para leer la historia con mas detalle."
+      <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
+        <h3 className="text-xl font-bold text-stone-100">Historia principal</h3>
+        <ExpandableText
+          lines={4}
+          text="Hace veinte inviernos, el Sol de Ceniza desaparecio detras de un eclipse eterno. Desde entonces, el Reino de las Sombras vive dividido entre casas nobles en decadencia, ordenes religiosas quebradas y gremios que comercian con reliquias prohibidas. La Corona de Carbon ha vuelto a latir bajo las ruinas de Valdren, y cada faccion sabe que reclamarla podria definir el destino de toda la temporada."
         />
+      </div>
 
-        <div className="grid gap-4 xl:grid-cols-2">
-          {LORE_CHAPTERS.map((chapter) => {
-            const isOpen = openChapter === chapter.title;
+      <div className="space-y-3">
+        {LORE_CHAPTERS.map((chapter) => (
+          <CollapsibleCard
+            key={chapter.title}
+            title={chapter.title}
+            summary={chapter.summary}
+          >
+            <p className="text-sm leading-6 text-stone-400">{chapter.content}</p>
+          </CollapsibleCard>
+        ))}
+      </div>
 
-            return (
-              <div
-                key={chapter.title}
-                className="overflow-hidden rounded-[1.75rem] border border-stone-800 bg-stone-900/75"
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenChapter((current) =>
-                      current === chapter.title ? null : chapter.title
-                    )
-                  }
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-                >
-                  <div>
-                    <h3 className="text-lg font-bold text-stone-100">
-                      {chapter.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-stone-400">
-                      {chapter.summary}
-                    </p>
-                  </div>
-                  <motion.div
-                    animate={{ rotate: isOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="rounded-full border border-stone-700 p-2 text-stone-400"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </motion.div>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {isOpen ? (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      className="overflow-hidden border-t border-stone-800"
-                    >
-                      <div className="p-5 text-sm leading-7 text-stone-400">
-                        {chapter.content}
-                      </div>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-              </div>
-            );
-          })}
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
+              Facciones del relato
+            </p>
+            <h3 className="mt-2 text-xl font-bold text-stone-100">Fuerzas en juego</h3>
+          </div>
+          <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+            <Flame className="h-5 w-5" />
+          </div>
         </div>
-      </section>
 
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Casas y poderes"
-          title="Facciones"
-          description="Mini fichas para presentar el tono y la identidad de cada grupo."
-        />
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {REALM_FACTIONS.map((faction) => (
-            <div
+        <div className="mt-4 space-y-3">
+          {STORY_FACTIONS.map((faction) => (
+            <CollapsibleCard
               key={faction.name}
-              className="rounded-[1.75rem] border border-stone-800 bg-stone-900/75 p-5"
+              title={faction.name}
+              summary={faction.summary}
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400/80">
-                {faction.motto}
-              </p>
-              <h3 className="mt-2 text-lg font-bold text-stone-100">
-                {faction.name}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-stone-400">
-                {faction.description}
-              </p>
-            </div>
+              <p className="text-sm leading-6 text-stone-400">{faction.details}</p>
+            </CollapsibleCard>
           ))}
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Demografia"
-          title="Distribucion de razas en Aethelgardia"
-          description="Bloques de poder y poblacion organizados por reinos, protectorados y naciones frontera."
-        />
+function WorldSection() {
+  return (
+    <section className="space-y-5">
+      <header className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
+          Mundo y geopolitica
+        </p>
+        <h2 className="mt-3 text-3xl font-black text-stone-100">Aethelgardia</h2>
+        <p className="mt-3 text-sm leading-6 text-stone-400">
+          Aqui vive el worldbuilding mas amplio: demografia, bloques politicos,
+          conflictos diplomaticos y amenazas que condicionan cada campana.
+        </p>
+      </header>
 
-        <div className="grid gap-4 xl:grid-cols-2">
-          {DEMOGRAPHIC_BLOCS.map((bloc) => (
-            <div
-              key={bloc.realm}
-              className="rounded-[1.75rem] border border-stone-800 bg-stone-900/75 p-5"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400/80">
-                {bloc.epithet}
-              </p>
-              <h3 className="mt-2 text-xl font-bold text-stone-100">
-                {bloc.realm}
-              </h3>
+      <div className="rounded-[2rem] border border-amber-500/15 bg-stone-900/75 p-6">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
+              Estado del mundo
+            </p>
+            <h3 className="mt-2 text-2xl font-black text-stone-100">{WORLD_STATUS.title}</h3>
+          </div>
+          <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+            <Map className="h-5 w-5" />
+          </div>
+        </div>
+        <p className="mt-3 text-sm leading-6 text-stone-400">{WORLD_STATUS.description}</p>
+      </div>
 
-              <div className="mt-4 grid gap-4">
-                {bloc.groups.map((group) => (
-                  <div
-                    key={group.title}
-                    className="rounded-[1.35rem] border border-stone-800 bg-stone-950/45 p-4"
-                  >
-                    <p className="text-sm font-bold text-stone-200">
-                      {group.title}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-stone-400">
-                      {group.races.join(" · ")}
-                    </p>
-                  </div>
-                ))}
-              </div>
+      <div className="space-y-3">
+        {DEMOGRAPHIC_BLOCS.map((bloc) => (
+          <CollapsibleCard
+            key={bloc.realm}
+            title={bloc.realm}
+            summary={`${bloc.epithet} - ${bloc.summary}`}
+          >
+            <div className="space-y-4">
+              {bloc.groups.map((group) => (
+                <div key={group.title} className="rounded-2xl border border-stone-800 bg-stone-950/45 p-4">
+                  <h4 className="text-sm font-bold text-stone-100">{group.title}</h4>
+                  <p className="mt-2 text-sm leading-6 text-stone-400">
+                    {group.races.join(", ")}
+                  </p>
+                </div>
+              ))}
             </div>
+          </CollapsibleCard>
+        ))}
+      </div>
+
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+        <h3 className="text-xl font-bold text-stone-100">Tensiones diplomaticas</h3>
+        <div className="mt-4 space-y-3">
+          {DIPLOMATIC_TENSIONS.map((item) => (
+            <CollapsibleCard
+              key={item.title}
+              title={item.title}
+              summary={item.summary}
+            >
+              <p className="text-sm leading-6 text-stone-400">{item.details}</p>
+            </CollapsibleCard>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="space-y-4">
-        <SectionHeader
-          eyebrow="Geopolitica"
-          title="Relaciones diplomaticas"
-          description="El mundo vive una paz tensa: dependencia mutua, rutas disputadas y espionaje permanente."
-        />
-
-        <div className="rounded-[1.75rem] border border-amber-500/15 bg-amber-500/8 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-            Estado del mundo
-          </p>
-          <h3 className="mt-2 text-2xl font-black text-stone-100">
-            {WORLD_STATUS.title}
-          </h3>
-          <p className="mt-3 text-sm leading-6 text-stone-400">
-            {WORLD_STATUS.description}
-          </p>
+      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
+        <h3 className="text-xl font-bold text-stone-100">Amenazas comunes</h3>
+        <div className="mt-4 space-y-3">
+          {COMMON_THREATS.map((item) => (
+            <CollapsibleCard
+              key={item.title}
+              title={item.title}
+              summary={item.summary}
+            >
+              <p className="text-sm leading-6 text-stone-400">{item.details}</p>
+            </CollapsibleCard>
+          ))}
         </div>
-
-        <div className="grid gap-4 xl:grid-cols-2">
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
-              Tensiones diplomaticas
-            </p>
-            {DIPLOMATIC_TENSIONS.map((note) => (
-              <div
-                key={note.title}
-                className="rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4"
-              >
-                <h3 className="text-lg font-bold text-stone-100">
-                  {note.title}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-stone-400">
-                  {note.description}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
-              Amenazas comunes
-            </p>
-            {COMMON_THREATS.map((note) => (
-              <div
-                key={note.title}
-                className="rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4"
-              >
-                <h3 className="text-lg font-bold text-stone-100">
-                  {note.title}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-stone-400">
-                  {note.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      </div>
     </section>
   );
 }
 
 function MarketSection() {
-  const [openCategory, setOpenCategory] = useState<MarketCategoryId | null>(
-    MARKET_CATEGORIES[0]?.id ?? null
-  );
-  const [selectedItem, setSelectedItem] = useState<MarketItem | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [rarityFilter, setRarityFilter] = useState<MarketRarityFilter>("all");
-  const [stockFilter, setStockFilter] = useState<MarketStockFilter>("all");
-
-  const normalizedSearch = searchTerm.trim().toLowerCase();
-
-  const filteredItems = useMemo(() => {
-    return MARKET_ITEMS.filter((item) => {
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        item.name.toLowerCase().includes(normalizedSearch) ||
-        item.description.toLowerCase().includes(normalizedSearch);
-      const matchesRarity =
-        rarityFilter === "all" || item.rarity === rarityFilter;
-      const matchesStock =
-        stockFilter === "all" || item.stockStatus === stockFilter;
-
-      return matchesSearch && matchesRarity && matchesStock;
-    });
-  }, [normalizedSearch, rarityFilter, stockFilter]);
-
   return (
     <section className="space-y-5">
       <header className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
           Mercado negro
         </p>
-        <h2 className="mt-3 text-3xl font-black text-stone-100">
-          Catalogo del mercader
-        </h2>
+        <h2 className="mt-3 text-3xl font-black text-stone-100">Tesoros y suministros</h2>
         <p className="mt-3 text-sm leading-6 text-stone-400">
-          Ahora el mercado tiene filtros, estados de stock y compra guiada por
-          producto con total calculado antes de enviar el pedido.
+          Compra equipo, amuletos y recursos narrativos para fortalecer a tu
+          personaje antes de la siguiente campana.
         </p>
       </header>
 
-      <div className="rounded-[2rem] border border-amber-500/15 bg-amber-500/6 p-4 text-sm leading-6 text-stone-400">
-        <p className="font-semibold text-amber-300">Nota sobre imagenes externas</p>
-        <p className="mt-2">
-          Puedes usar URLs directas de imagen en cada producto. Si quieres usar
-          Pinterest, la URL debe apuntar al archivo de imagen, por ejemplo
-          `https://i.pinimg.com/...jpg`, no a una pagina `pinterest.com/pin/...`.
-          Si Pinterest bloquea el hotlink, la tarjeta mostrara un fallback visual.
-        </p>
-      </div>
-
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-4">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
-          <label className="space-y-2">
-            <span className="text-sm font-semibold text-stone-200">Buscar</span>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Ej. eclipse, pocion, armadura..."
-              className="w-full rounded-2xl border border-stone-700 bg-stone-950 px-4 py-3 text-sm text-stone-100 outline-none transition placeholder:text-stone-500 focus:border-amber-400/40"
-            />
-          </label>
-
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-stone-200">Rareza</p>
-            <div className="flex flex-wrap gap-2">
-              {(["all", "legendary", "epic", "rare", "common"] as const).map(
-                (entry) => (
-                  <FilterPill
-                    key={entry}
-                    label={
-                      entry === "all"
-                        ? "Todas"
-                        : entry === "legendary"
-                          ? "Legendario"
-                          : entry === "epic"
-                            ? "Epico"
-                            : entry === "rare"
-                              ? "Raro"
-                              : "Comun"
-                    }
-                    active={rarityFilter === entry}
-                    onClick={() => setRarityFilter(entry)}
-                  />
-                )
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-stone-200">Disponibilidad</p>
-            <div className="flex flex-wrap gap-2">
-              {(["all", "available", "limited", "sold-out"] as const).map(
-                (entry) => (
-                  <FilterPill
-                    key={entry}
-                    label={
-                      entry === "all"
-                        ? "Todos"
-                        : entry === "available"
-                          ? "Disponible"
-                          : entry === "limited"
-                            ? "Limitado"
-                            : "Agotado"
-                    }
-                    active={stockFilter === entry}
-                    onClick={() => setStockFilter(entry)}
-                  />
-                )
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="space-y-4">
-        {MARKET_CATEGORIES.map((category) => {
-          const Icon = category.icon;
-          const isOpen = openCategory === category.id;
-          const items = filteredItems.filter((item) => item.category === category.id);
+        {MARKET_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const style = rarityStyles[item.rarity];
 
           return (
-            <div
-              key={category.id}
-              className="overflow-hidden rounded-[1.8rem] border border-stone-800 bg-stone-900/75"
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  setOpenCategory((current) =>
-                    current === category.id ? null : category.id
-                  )
-                }
-                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-              >
-                <div className="flex min-w-0 items-center gap-4">
-                  <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-lg font-bold text-stone-100">
-                      {category.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-stone-400">
-                      {category.subtitle}
-                    </p>
-                  </div>
+            <div key={item.name} className={`rounded-[1.75rem] border p-4 ${style.card}`}>
+              <div className="flex items-start gap-4">
+                <div className={`rounded-2xl p-3 ${style.iconWrap}`}>
+                  <Icon className="h-6 w-6" />
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full border border-stone-700 bg-stone-950/60 px-3 py-1 text-xs font-semibold text-stone-400">
-                    {items.length}
-                  </span>
-                  <motion.div
-                    animate={{ rotate: isOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="rounded-full border border-stone-700 p-2 text-stone-400"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </motion.div>
-                </div>
-              </button>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <h3 className="text-lg font-bold text-stone-100">{item.name}</h3>
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold ${style.badge}`}>
+                      {style.label}
+                    </span>
+                  </div>
 
-              <AnimatePresence initial={false}>
-                {isOpen ? (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
-                    className="overflow-hidden border-t border-stone-800"
-                  >
-                    <div className="grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {items.length > 0 ? (
-                        items.map((item) => (
-                          <MarketItemCard
-                            key={item.name}
-                            item={item}
-                            onBuy={() => setSelectedItem(item)}
-                          />
-                        ))
-                      ) : (
-                        <div className="rounded-[1.5rem] border border-dashed border-stone-700 bg-stone-950/45 p-5 text-sm leading-6 text-stone-500 sm:col-span-2">
-                          No hay productos que coincidan con los filtros en esta
-                          categoria.
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
+                  <p className="mt-2 text-sm leading-6 text-stone-300/85">{item.description}</p>
+
+                  <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-stone-950/50 px-3 py-2 text-sm font-bold text-amber-300 ring-1 ring-inset ring-amber-500/10">
+                    <Coins className="h-4 w-4" />
+                    {item.price} de oro
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
-
-      <AnimatePresence>
-        {selectedItem ? (
-          <PurchaseModal
-            item={selectedItem}
-            category={MARKET_CATEGORIES.find(
-              (entry) => entry.id === selectedItem.category
-            )}
-            onClose={() => setSelectedItem(null)}
-          />
-        ) : null}
-      </AnimatePresence>
     </section>
   );
 }
 
 function RankingSection() {
-  const [statusFilter, setStatusFilter] = useState<RankingStatusFilter>("all");
-  const [factionFilter, setFactionFilter] = useState<string>("all");
-
-  const factions = useMemo(
-    () => Array.from(new Set(RANKING_PLAYERS.map((player) => player.faction))),
-    []
-  );
-  const filteredPlayers = useMemo(() => {
-    return RANKING_PLAYERS.filter((player) => {
-      const matchesStatus =
-        statusFilter === "all" || player.status === statusFilter;
-      const matchesFaction =
-        factionFilter === "all" || player.faction === factionFilter;
-
-      return matchesStatus && matchesFaction;
-    });
-  }, [statusFilter, factionFilter]);
-
-  const topPlayer = filteredPlayers[0];
-
   return (
     <section className="space-y-5">
       <header className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
           Salon de la fama
         </p>
-        <h2 className="mt-3 text-3xl font-black text-stone-100">
-          Ranking de jugadores
-        </h2>
+        <h2 className="mt-3 text-3xl font-black text-stone-100">Ranking de jugadores</h2>
         <p className="mt-3 text-sm leading-6 text-stone-400">
-          Filtra por estado y faccion para revisar el tablero del reino de forma
-          mas clara.
+          Los campeones del reino se ordenan por nivel, riqueza y supervivencia en
+          campanas oficiales.
         </p>
       </header>
 
-      {topPlayer ? (
-        <div className="rounded-[1.75rem] border border-amber-500/15 bg-amber-500/8 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
-            Campeon actual
-          </p>
-          <h3 className="mt-2 text-2xl font-black text-stone-100">
-            {topPlayer.name}
-          </h3>
-          <p className="mt-1 text-sm text-stone-400">{topPlayer.faction}</p>
-        </div>
-      ) : null}
+      <div className="space-y-4">
+        {RANKING_PLAYERS.map((player, index) => {
+          const isDead = player.status === "dead";
 
-      <div className="rounded-[2rem] border border-stone-800 bg-stone-900/75 p-4">
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-stone-200">Estado</p>
-            <div className="flex flex-wrap gap-2">
-              {(["all", "alive", "dead"] as const).map((entry) => (
-                <FilterPill
-                  key={entry}
-                  label={
-                    entry === "all"
-                      ? "Todos"
-                      : entry === "alive"
-                        ? "Vivos"
-                        : "Muertos"
-                  }
-                  active={statusFilter === entry}
-                  onClick={() => setStatusFilter(entry)}
-                />
-              ))}
+          return (
+            <div
+              key={player.name}
+              className={`rounded-[1.75rem] border border-stone-800 bg-stone-900/80 p-4 transition ${
+                isDead ? "grayscale opacity-80" : ""
+              }`}
+            >
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-stone-800 text-lg font-black text-amber-300">
+                  #{index + 1}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-bold text-stone-100">{player.name}</h3>
+                    {index === 0 && <Crown className="h-5 w-5 text-amber-400" />}
+                    {isDead && <Skull className="h-4 w-4 text-stone-400" />}
+                  </div>
+
+                  <p className="mt-1 text-sm text-stone-400">{player.faction}</p>
+
+                  <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+                    <RankingMetric label="Nivel" value={player.level} />
+                    <RankingMetric label="Oro" value={player.gold} />
+                    <RankingMetric label="Estado" value={isDead ? "Muerto" : "Vivo"} />
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-stone-200">Faccion</p>
-            <div className="flex flex-wrap gap-2">
-              <FilterPill
-                label="Todas"
-                active={factionFilter === "all"}
-                onClick={() => setFactionFilter("all")}
-              />
-              {factions.map((faction) => (
-                <FilterPill
-                  key={faction}
-                  label={faction}
-                  active={factionFilter === faction}
-                  onClick={() => setFactionFilter(faction)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        {filteredPlayers.length > 0 ? (
-          filteredPlayers.map((player, index) => (
-            <RankingCard key={player.name} player={player} index={index} />
-          ))
-        ) : (
-          <div className="rounded-[1.75rem] border border-dashed border-stone-700 bg-stone-900/55 p-5 text-sm leading-6 text-stone-500">
-            No hay jugadores que coincidan con los filtros seleccionados.
-          </div>
-        )}
+          );
+        })}
       </div>
     </section>
   );
 }
 
+function StatCard({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: LucideIcon;
+  value: string;
+  label: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-stone-800 bg-stone-950/65 p-3 text-center">
+      <Icon className="mx-auto h-5 w-5 text-amber-400" />
+      <p className="mt-2 text-lg font-black text-stone-100">{value}</p>
+      <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">{label}</p>
+    </div>
+  );
+}
+
+function LoreCard({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-[1.75rem] border border-stone-800 bg-stone-900/75 p-5">
+      <div className="flex items-start gap-4">
+        <div className="rounded-2xl bg-amber-500/10 p-3 text-amber-400">
+          <Icon className="h-5 w-5" />
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-stone-100">{title}</h3>
+          <p className="mt-2 text-sm leading-6 text-stone-400">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RankingMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <div className="rounded-2xl border border-stone-800 bg-stone-950/55 px-3 py-3">
+      <p className="text-[11px] uppercase tracking-[0.18em] text-stone-500">{label}</p>
+      <p className="mt-1 text-sm font-bold text-stone-200">{value}</p>
+    </div>
+  );
+}
+
+function ExpandableText({
+  text,
+  lines = 3,
+}: {
+  text: string;
+  lines?: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="mt-3">
+      <p
+        className="text-sm leading-7 text-stone-400"
+        style={
+          expanded
+            ? undefined
+            : {
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: lines,
+                overflow: "hidden",
+              }
+        }
+      >
+        {text}
+      </p>
+      <button
+        type="button"
+        onClick={() => setExpanded((value) => !value)}
+        className="mt-3 text-sm font-semibold text-amber-300 transition hover:text-amber-200"
+      >
+        {expanded ? "Ver menos" : "Ver mas"}
+      </button>
+    </div>
+  );
+}
+
+function CollapsibleCard({
+  title,
+  summary,
+  children,
+}: {
+  title: string;
+  summary: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="group rounded-[1.75rem] border border-stone-800 bg-stone-900/75 p-5">
+      <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h3 className="text-lg font-bold text-stone-100">{title}</h3>
+          <p className="mt-2 text-sm leading-6 text-stone-400">{summary}</p>
+        </div>
+        <div className="rounded-2xl bg-stone-800 p-3 text-stone-300 transition group-open:rotate-180 group-open:text-amber-300">
+          <ChevronDown className="h-5 w-5" />
+        </div>
+      </summary>
+      <div className="mt-4 border-t border-stone-800 pt-4">{children}</div>
+    </details>
+  );
+}
