@@ -14,7 +14,7 @@ export function SectionHeader({
   rightSlot,
 }: SectionHeaderProps) {
   return (
-    <div className="flex items-end justify-between gap-4">
+    <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-4">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-400/80">
           {eyebrow}
