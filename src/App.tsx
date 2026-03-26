@@ -26,6 +26,12 @@ import {
 import { LORE_CHAPTERS, LORE_RULES, REALM_FACTIONS } from "./data/lore";
 import { MARKET_CATEGORIES, MARKET_ITEMS } from "./data/market";
 import { RANKING_PLAYERS } from "./data/ranking";
+import {
+  COMMON_THREATS,
+  DEMOGRAPHIC_BLOCS,
+  DIPLOMATIC_TENSIONS,
+  WORLD_STATUS,
+} from "./data/world";
 import type {
   MarketCategoryId,
   MarketItem,
@@ -405,6 +411,106 @@ function LoreSection() {
           ))}
         </div>
       </section>
+
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="Demografia"
+          title="Distribucion de razas en Aethelgardia"
+          description="Bloques de poder y poblacion organizados por reinos, protectorados y naciones frontera."
+        />
+
+        <div className="grid gap-4 xl:grid-cols-2">
+          {DEMOGRAPHIC_BLOCS.map((bloc) => (
+            <div
+              key={bloc.realm}
+              className="rounded-[1.75rem] border border-stone-800 bg-stone-900/75 p-5"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-400/80">
+                {bloc.epithet}
+              </p>
+              <h3 className="mt-2 text-xl font-bold text-stone-100">
+                {bloc.realm}
+              </h3>
+
+              <div className="mt-4 grid gap-4">
+                {bloc.groups.map((group) => (
+                  <div
+                    key={group.title}
+                    className="rounded-[1.35rem] border border-stone-800 bg-stone-950/45 p-4"
+                  >
+                    <p className="text-sm font-bold text-stone-200">
+                      {group.title}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-stone-400">
+                      {group.races.join(" · ")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <SectionHeader
+          eyebrow="Geopolitica"
+          title="Relaciones diplomaticas"
+          description="El mundo vive una paz tensa: dependencia mutua, rutas disputadas y espionaje permanente."
+        />
+
+        <div className="rounded-[1.75rem] border border-amber-500/15 bg-amber-500/8 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+            Estado del mundo
+          </p>
+          <h3 className="mt-2 text-2xl font-black text-stone-100">
+            {WORLD_STATUS.title}
+          </h3>
+          <p className="mt-3 text-sm leading-6 text-stone-400">
+            {WORLD_STATUS.description}
+          </p>
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-2">
+          <div className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
+              Tensiones diplomaticas
+            </p>
+            {DIPLOMATIC_TENSIONS.map((note) => (
+              <div
+                key={note.title}
+                className="rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4"
+              >
+                <h3 className="text-lg font-bold text-stone-100">
+                  {note.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-stone-400">
+                  {note.description}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-400/80">
+              Amenazas comunes
+            </p>
+            {COMMON_THREATS.map((note) => (
+              <div
+                key={note.title}
+                className="rounded-[1.6rem] border border-stone-800 bg-stone-900/75 p-4"
+              >
+                <h3 className="text-lg font-bold text-stone-100">
+                  {note.title}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-stone-400">
+                  {note.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </section>
   );
 }
@@ -726,3 +832,4 @@ function RankingSection() {
     </section>
   );
 }
+
