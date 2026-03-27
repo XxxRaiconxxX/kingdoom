@@ -5,7 +5,7 @@ export const WHATSAPP_JOIN_URL =
   "https://chat.whatsapp.com/TU-ENLACE-DE-INVITACION";
 
 export const HOME_STATS: HomeStat[] = [
-  { value: "120+", label: "Personajes", icon: Users },
+  { value: "En progreso", label: "Personajes", icon: Users },
   { value: "4", label: "Facciones", icon: Flame },
   { value: "24/7", label: "Eventos", icon: Dice5 },
 ];
