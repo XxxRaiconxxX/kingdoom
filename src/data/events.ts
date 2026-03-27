@@ -24,7 +24,7 @@ export const ACTIVE_EVENTS: RealmEvent[] = [
     longDescription:
       "Las ruinas esconden la Corona de Carbon y varias rutas subterraneas. El evento definira control territorial, alianzas rotas y reparto de botin.",
     imageUrl:
-      "https://images.unsplash.com/photo-1518562180175-34a163b1a9a6?auto=format&fit=crop&w=1200&q=80",
+      "",
     startDate: "Pendiente",
     endDate: "Pendiente",
     status: "in-production",
@@ -39,7 +39,7 @@ export const ACTIVE_EVENTS: RealmEvent[] = [
     longDescription:
       "El evento cerro con un asesinato ceremonial, tres juramentos rotos y un nuevo mapa de favores dentro de la corte. Sus consecuencias siguen vigentes.",
     imageUrl:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80",
+      "",
     startDate: "Pendiente",
     endDate: "Pendiente",
     status: "in-production",
