@@ -66,7 +66,7 @@ export function MarketItemCard({
 
   return (
     <article className={`overflow-hidden rounded-[1.5rem] border ${style.card}`}>
-      <div className="relative aspect-[4/5] bg-stone-950">
+      <div className="relative aspect-[4/5] bg-gradient-to-br from-stone-950 via-stone-900 to-stone-950">
         {!imageFailed ? (
           <img
             src={item.imageUrl}
@@ -74,7 +74,11 @@ export function MarketItemCard({
             loading="lazy"
             referrerPolicy="no-referrer"
             onError={() => setImageFailed(true)}
-            className={`h-full w-full object-cover ring-1 ring-inset ${style.imageRing}`}
+            style={{
+              objectFit: item.imageFit ?? "cover",
+              objectPosition: item.imagePosition ?? "center",
+            }}
+            className={`h-full w-full ring-1 ring-inset ${style.imageRing}`}
           />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-stone-900 to-stone-950 p-6 text-center">
@@ -88,7 +92,7 @@ export function MarketItemCard({
           </div>
         )}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-stone-950 via-stone-950/70 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-stone-950 via-stone-950/55 to-transparent" />
       </div>
 
       <div className="space-y-3 p-4">

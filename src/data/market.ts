@@ -40,8 +40,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     rarity: "rare",
     stockStatus: "available",
     featured: true,
-    imageUrl:
-      "",
+    imageUrl: "",
+    imagePosition: "center top",
   },
   {
     category: "potions",
@@ -53,10 +53,9 @@ export const MARKET_ITEMS: MarketItem[] = [
     price: 320,
     rarity: "epic",
     stockStatus: "limited",
-    imageUrl:
-      "",
+    imageUrl: "",
+    imagePosition: "center top",
   },
-  
   {
     category: "others",
     name: "Sello de Obsidiana",
@@ -67,8 +66,9 @@ export const MARKET_ITEMS: MarketItem[] = [
     price: 780,
     rarity: "epic",
     stockStatus: "available",
-    imageUrl:
-      "",
+    imageUrl: "",
+    imageFit: "contain",
+    imagePosition: "center",
   },
   {
     category: "others",
@@ -76,12 +76,13 @@ export const MARKET_ITEMS: MarketItem[] = [
     description:
       "Suministros basicos para viajes largos, asedios y expediciones nocturnas.",
     ability:
-      "Marcha austera: evita desgaste menor durante travesias largas o campañas de frontera.",
+      "Marcha austera: evita desgaste menor durante travesias largas o campanias de frontera.",
     price: 95,
     rarity: "common",
     stockStatus: "sold-out",
-    imageUrl:
-      "",
+    imageUrl: "",
+    imageFit: "contain",
+    imagePosition: "center",
   },
   {
     category: "swords",
@@ -96,6 +97,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     featured: true,
     imageUrl:
       "https://i.pinimg.com/control1/736x/0b/d2/93/0bd293ecda955dc6fd62f1e12ea94731.jpg",
+    imageFit: "contain",
+    imagePosition: "center",
   },
   {
     category: "swords",
@@ -109,6 +112,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     stockStatus: "limited",
     imageUrl:
       "https://i.pinimg.com/control1/736x/03/66/b2/0366b2bc08564c5014a8307d6741a50b.jpg",
+    imageFit: "contain",
+    imagePosition: "center",
   },
   {
     category: "swords",
@@ -122,12 +127,14 @@ export const MARKET_ITEMS: MarketItem[] = [
     stockStatus: "available",
     imageUrl:
       "https://i.pinimg.com/control1/736x/bb/1d/99/bb1d99ccef2d15e84f00a80bf72a2d03.jpg",
+    imageFit: "contain",
+    imagePosition: "center",
   },
   {
     category: "swords",
     name: "Filo del Peregrino Carmesi",
     description:
-      "Hoja larga de viajero errante, marcada por campañas, juramentos y sangre de frontera.",
+      "Hoja larga de viajero errante, marcada por campanias, juramentos y sangre de frontera.",
     ability:
       "Impulso del caminante: si conecta el primer ataque, gana ventaja en persecuciones, retiradas o reposicionamiento.",
     price: 840,
@@ -135,6 +142,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     stockStatus: "available",
     imageUrl:
       "https://i.pinimg.com/736x/ab/4e/96/ab4e96193aace3761e17f27dfff9d85a.jpg",
+    imageFit: "contain",
+    imagePosition: "center",
   },
   {
     category: "armors",
@@ -142,13 +151,15 @@ export const MARKET_ITEMS: MarketItem[] = [
     description:
       "Armadura de pecho imponente, tallada para comandantes que deben sobrevivir a la primera linea.",
     ability:
-      "Orgullo del leon: el primer golpe grave de la escena se reduce a daño moderado una vez por evento.",
+      "Orgullo del leon: el primer golpe grave de la escena se reduce a danio moderado una vez por evento.",
     price: 1180,
     rarity: "epic",
     stockStatus: "limited",
     featured: true,
     imageUrl:
       "https://i.pinimg.com/736x/4f/2c/ad/4f2cad925b00704b8308fc8d28c1bf32.jpg",
+    imageFit: "contain",
+    imagePosition: "center top",
   },
   {
     category: "armors",
@@ -162,6 +173,8 @@ export const MARKET_ITEMS: MarketItem[] = [
     stockStatus: "available",
     imageUrl:
       "https://i.pinimg.com/736x/de/51/b6/de51b6d4a895ff80c0cbdda7ec51ec47.jpg",
+    imageFit: "contain",
+    imagePosition: "center top",
   },
   {
     category: "armors",
@@ -169,11 +182,13 @@ export const MARKET_ITEMS: MarketItem[] = [
     description:
       "Armadura sagrada de silueta heroica, creada para custodios que deben proteger a toda costa.",
     ability:
-      "Bastion de guardian: permite interceptar parte del daño o una maldicion dirigida a un aliado cercano.",
+      "Bastion de guardian: permite interceptar parte del danio o una maldicion dirigida a un aliado cercano.",
     price: 1290,
     rarity: "legendary",
     stockStatus: "limited",
     imageUrl:
       "https://i.pinimg.com/control1/736x/a8/fb/5c/a8fb5c3bce9b1344f58e9b398a0f60f0.jpg",
+    imageFit: "contain",
+    imagePosition: "center top",
   },
 ];

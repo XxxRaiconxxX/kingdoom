@@ -27,6 +27,8 @@ export type MarketItem = {
   price: number;
   rarity: Rarity;
   imageUrl: string;
+  imageFit?: "cover" | "contain";
+  imagePosition?: string;
   category: MarketCategoryId;
   stockStatus: StockStatus;
   featured?: boolean;
